@@ -13,13 +13,27 @@ const publicDirectoryPath = path.join(__dirname, '../public')
 // server (emit) -> client (receive) - count update
 // client (emit) -> server (receive) - increment
 
+/* 
+ events
+  - socket.emit => to emit to that particular connection
+  - socket.broadcast.emit => to emit to everyone except the current client connection
+  - io.emit => to emit to all to connections
+
+  - connection and disconnect are default events
+*/
+
 io.on("connection", (socket) => {
     console.log("new web socket connection")
 
     socket.emit("message", "Welcome!")
+    socket.broadcast.emit("message", "A new user has joined")
 
     socket.on("sendMessage", (message) => {
         io.emit("message", message)
+    })
+
+    socket.on("disconnect", () => {
+        io.emit("message", "A user has left!")
     })
 })
 
