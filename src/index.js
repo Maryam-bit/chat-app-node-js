@@ -21,14 +21,21 @@ const publicDirectoryPath = path.join(__dirname, '../public')
   - socket.broadcast.emit => to emit to everyone except the current client connection
   - io.emit => to emit to all to connections
 
+  socket.join => to join the rooms
+  io.to.emit > to emit an event to everyone for specific room
+  socket.boradcast.to.emit > send event to everyone except the current client for specific room
+
   - connection and disconnect are default events
 */
 
 io.on("connection", (socket) => {
     console.log("new web socket connection")
 
-    socket.emit("message", generateMessage("Welcome!"))
-    socket.broadcast.emit("message", generateMessage("A new user has joined"))
+    socket.on("join", ({ username, room }) => {
+        socket.join(room)
+        socket.emit("message", generateMessage("Welcome!"))
+        socket.broadcast.to(room).emit("message", generateMessage(`${username} has joined!`))
+    })
 
     socket.on("sendMessage", (message, callback) => {
         const filter = new Filter()
