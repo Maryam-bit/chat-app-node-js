@@ -5,6 +5,7 @@ const socketio = require("socket.io")
 const Filter = require("bad-words")
 const { generateMessage, generateLocationMessage } = require("./utils/messages")
 const { addUser, removeUser, getUsersInRoom, getUser } =  require("./utils/users")
+const { addRoom, getRooms, recountRoom } =  require("./utils/rooms")
 
 const app = express()
 const server = http.createServer(app)
@@ -31,6 +32,7 @@ const publicDirectoryPath = path.join(__dirname, '../public')
 
 io.on("connection", (socket) => {
     console.log("new web socket connection")
+    io.emit("currentRooms",getRooms())
 
     socket.on("join", (options, callback) => {
         const { error, user } = addUser({ id: socket.id, ...options })
@@ -45,6 +47,7 @@ io.on("connection", (socket) => {
             room: user.room,
             users: getUsersInRoom(user.room)
         })
+        io.emit("currentRooms" ,addRoom(user.room))
         callback()
     })
 
@@ -74,6 +77,8 @@ io.on("connection", (socket) => {
                 room: user.room,
                 users: getUsersInRoom(user.room)
             })
+        io.emit("currentRooms" ,recountRoom(user.room))
+
         }
     })
 })
